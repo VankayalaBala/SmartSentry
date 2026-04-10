@@ -19,7 +19,6 @@ SmartSentry is a comprehensive Cyber Threat Intelligence (CTI) framework tailore
 
 
 🚀 Features
-⚙️ Core Functionality
 
     Real-time Threat Detection: Preemptively identify and classify specific attack types.
 
@@ -88,6 +87,18 @@ SmartSentry evaluates network traffic against multiple trained algorithms to pro
 * **k-Nearest Neighbor (KNN):** A robust instance-based learning algorithm used for proximity-based anomaly detection.
 * **Deep Neural Network (DNN):** A deep learning architecture designed to catch complex, layered patterns in modern IIoT cyberattacks.
 * **SMOTE (Synthetic Minority Over-sampling Technique):** While not a classification model, this crucial preprocessing algorithm is used to balance the dataset, ensuring the models don't become biased toward majority classes (like normal traffic) and can accurately detect rare, high-severity attacks.
+
+⚙️ Core Functionality
+
+## 🚨 Detected Cyber Threats
+SmartSentry is trained on the comprehensive Edge-IIoTset dataset, enabling it to accurately identify and classify high-severity anomalies and attacks specific to Industrial IoT networks. Our platform successfully detects:
+
+* 🔍 **Port Scanning:** Identifies unauthorized reconnaissance attempts where attackers systematically probe the IIoT network for open ports and vulnerable services.
+* 💥 **DDoS ICMP (Ping Flood):** Detects volumetric attacks that attempt to overwhelm IIoT devices and network bandwidth with massive amounts of ICMP echo requests.
+* 🛑 **DDoS TCP (SYN Flood):** Recognizes TCP-based Denial of Service attacks designed to exhaust server connection state tables and render industrial systems unresponsive.
+* 🌊 **DDoS UDP:** Spots UDP flood attacks aiming to overwhelm random ports on targeted IIoT hosts, causing critical systems to continuously check for applications that don't exist.
+* 🔒 **Ransomware:** Flags anomalous network traffic patterns indicative of ransomware spreading laterally across the industrial network or communicating with command-and-control servers.
+* 🩻 **Vulnerability Scanner:** Detects aggressive, automated scanning activities that attempt to find known exploits, misconfigurations, and weak points within the infrastructure.
 
   
 🏃‍♂️ Quick Start
