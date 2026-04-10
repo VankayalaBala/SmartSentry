@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SmartSentry | Attack Prediction</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --dark-bg: #0a192f;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: var(--dark-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(103, 126, 234, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(118, 75, 162, 0.1) 0%, transparent 20%);
+        }
+        
+        /* Custom Navigation */
+        .custom-navbar {
+            background: rgba(10, 25, 47, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .logo i {
+            font-size: 1.8rem;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        .nav-link {
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--primary-gradient);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+        
+        .nav-link:hover::before {
+            left: 0;
+        }
+        
+        .nav-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .nav-link.active {
+            background: var(--primary-gradient);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .nav-link i {
+            font-size: 1.1rem;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 80px;
+            padding: 2rem 1rem;
+        }
+        
+        .hero-section {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+        
+        .hero-title {
+            font-size: 3.5rem;
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+            }
+            to {
+                text-shadow: 0 0 30px rgba(118, 75, 162, 0.8), 0 0 40px rgba(240, 147, 251, 0.6);
+            }
+        }
+        
+        .hero-subtitle {
+            color: #a8b2d1;
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+        
+        /* Glass Card */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+            color: #fff;
+            font-size: 1.5rem;
+        }
+        
+        .card-title i {
+            background: var(--primary-gradient);
+            padding: 10px;
+            border-radius: 12px;
+            font-size: 1.3rem;
+        }
+        
+        /* Prediction Result */
+        .result-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4); }
+            70% { box-shadow: 0 0 0 20px rgba(102, 126, 234, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0); }
+        }
+        
+        .attack-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        
+        .severity-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin: 10px 0;
+            display: inline-block;
+        }
+        
+        .prevention-tip {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #667eea;
+        }
+        
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #a8b2d1;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+        
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Buttons */
+        .btn-glow {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-glow:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-glow:active {
+            transform: translateY(-1px);
+        }
+        
+        .btn-glow::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn-glow:active::after {
+            width: 300px;
+            height: 300px;
+        }
+        
+        /* Stats Counter */
+        .stats-counter {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .stat-label {
+            color: #a8b2d1;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        
+        /* Error Message */
+        .error-message {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid rgba(220, 53, 69, 0.5);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #a8b2d1;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .form-group {
+                flex: 1 1 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="custom-navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <i class="fas fa-shield-alt"></i>
+                SmartSentry
+            </a>
+            
+            <div class="nav-links">
+                <a href="/" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    Home
+                </a>
+              
+                <a href="/upload" class="nav-link">
+                    <i class="fas fa-upload"></i>
+                    Upload
+                </a>
+                <a href="/models" class="nav-link">
+                    <i class="fas fa-brain"></i>
+                    Models
+                </a>
+                <a href="/prediction" class="nav-link active">
+                    <i class="fas fa-bolt"></i>
+                    Prediction
+                </a>
+                
+                <a href="/logout" class="nav-link">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <h1 class="hero-title">Network Attack Prediction</h1>
+            <p class="hero-subtitle">
+                Enter network parameters to detect and analyze potential security threats in real-time
+            </p>
+        </div>
+
+        <!-- Prediction Results Section -->
+        {% if result or error %}
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    {% if error %}
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h4>Error!</h4>
+                        <p>{{ error }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if result %}
+                    <div class="glass-card result-card">
+                        <div class="attack-icon" style="color: {{ attack_info.color }}">
+                            {{ attack_info.icon }}
+                        </div>
+                        <h2 style="color: {{ attack_info.color }}; margin-bottom: 10px;">
+                            {{ result }}
+                        </h2>
+                        <span class="severity-badge" style="background: {{ attack_info.color }};">
+                            {{ attack_info.severity }} SEVERITY
+                        </span>
+                        
+                        <div class="mt-4">
+                            <h4 class="card-title">
+                                <i class="fas fa-file-alt"></i>
+                                Attack Description
+                            </h4>
+                            <p>{{ attack_info.description }}</p>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h4 class="card-title">
+                                <i class="fas fa-shield-alt"></i>
+                                Prevention Tips
+                            </h4>
+                            {% for tip in attack_info.prevention_tips %}
+                            <div class="prevention-tip">
+                                <i class="fas fa-check-circle" style="color: {{ attack_info.color }}; margin-right: 10px;"></i>
+                                {{ tip }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Stats Counter -->
+                    <div class="stats-counter">
+                        <div class="stat-item">
+                            <div class="stat-number">7</div>
+                            <div class="stat-label">Attack Types</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">99.8%</div>
+                            <div class="stat-label">Accuracy</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">24/7</div>
+                            <div class="stat-label">Monitoring</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Prediction Form -->
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-12">
+                    <div class="glass-card">
+                        <h3 class="card-title">
+                            <i class="fas fa-network-wired"></i>
+                            Network Parameters
+                        </h3>
+                        
+                        <form action="{{url_for('prediction')}}" method="post">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                                <!-- Form Fields -->
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fas fa-server"></i>
+                                        IP Destination Host
+                                    </label>
+                                    <input type="number" name="ip_dst_host" class="form-control" 
+                                           placeholder="Enter any number" step="any" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fas fa-ruler-horizontal"></i>
+                                        HTTP Content Length
+                                    </label>
+                                    <input type="number" name="http_content_length" class="form-control" 
+                                           placeholder="Enter any number" step="any" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fas fa-exchange-alt"></i>
+                                        TCP Acknowledgment
+                                    </label>
+                                    <input type="number" name="tcp_ack" class="form-control" 
+                                           placeholder="Enter any number" step="any" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fas fa-bolt"></i>
+                                        TCP Raw Acknowledgment
+                                    </label>
+                                    <input type="number" name="tcp_ack_raw" class="form-control" 
+                                           placeholder="Enter any number" step="any" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fas fa-door-open"></i>
+                                        TCP Destination Port
+                                    </label>
+                                    <input type="number" name="tcp_dstport" class="form-control" 
+                                           placeholder="Enter any number" step="any" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fas fa-flag"></i>
+                                        TCP Flags
+                                    </label>
+                                    <input type="number" name="tcp_flags" class="form-control" 
+                                           placeholder="Enter any number" step="any" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fas fa-ruler"></i>
+                                        TCP Length
+                                    </label>
+                                    <input type="number" name="tcp_len" class="form-control" 
+                                           placeholder="Enter any number" step="any" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fas fa-cog"></i>
+                                        TCP Options
+                                    </label>
+                                    <input type="number" name="tcp_options" class="form-control" 
+                                           placeholder="Enter any number" step="any" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fas fa-weight-hanging"></i>
+                                        TCP Payload
+                                    </label>
+                                    <input type="number" name="tcp_payload" class="form-control" 
+                                           placeholder="Enter any number" step="any" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fas fa-sort-numeric-up"></i>
+                                        TCP Sequence Number
+                                    </label>
+                                    <input type="number" name="tcp_seq" class="form-control" 
+                                           placeholder="Enter any number" step="any" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fas fa-door-closed"></i>
+                                        TCP Source Port
+                                    </label>
+                                    <input type="number" name="tcp_srcport" class="form-control" 
+                                           placeholder="Enter any number" step="any" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fas fa-redo"></i>
+                                        DNS Retransmit
+                                    </label>
+                                    <input type="number" name="dns_retransmit" class="form-control" 
+                                           placeholder="Enter any number" step="any" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fas fa-satellite-dish"></i>
+                                        MQTT Version
+                                    </label>
+                                    <input type="number" name="mqtt_ver" class="form-control" 
+                                           placeholder="Enter any number" step="any" required>
+                                </div>
+                            </div>
+                            
+                            <!-- Action Buttons -->
+                            <div style="display: flex; gap: 15px; justify-content: center; margin-top: 30px;">
+                                <button type="submit" class="btn-glow">
+                                    <i class="fas fa-bolt"></i>
+                                    Predict Attack
+                                </button>
+                                
+                                <button type="button" onclick="clearForm()" 
+                                        style="background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.3);"
+                                        class="btn-glow">
+                                    <i class="fas fa-eraser"></i>
+                                    Clear All
+                                </button>
+                                
+                                <button type="button" onclick="fillSample()" 
+                                        style="background: rgba(0, 123, 255, 0.2); color: #007bff; border: 1px solid #007bff;"
+                                        class="btn-glow">
+                                    <i class="fas fa-magic"></i>
+                                    Sample Data
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>© 2026 SmartSentry | Network Security AI Platform</p>
+        <p style="font-size: 0.9rem; margin-top: 10px;">
+            <i class="fas fa-shield-alt"></i> Protecting your network 24/7
+        </p>
+    </footer>
+
+    <script>
+        // Clear all form fields
+        function clearForm() {
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                input.value = '';
+            });
+        }
+        
+        // Fill form with sample data for testing
+        function fillSample() {
+            const sampleData = {
+                'ip_dst_host': 5,
+                'http_content_length': 450,
+                'tcp_ack': 1234567,
+                'tcp_ack_raw': 9876543,
+                'tcp_dstport': 443,
+                'tcp_flags': 2,
+                'tcp_len': 1200,
+                'tcp_options': 8,
+                'tcp_payload': 1150,
+                'tcp_seq': 7654321,
+                'tcp_srcport': 54321,
+                'dns_retransmit': 0,
+                'mqtt_ver': 3
+            };
+            
+            for (const [key, value] of Object.entries(sampleData)) {
+                const input = document.querySelector(`input[name="${key}"]`);
+                if (input) input.value = value;
+            }
+        }
+        
+        // Add floating animation to cards
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.glass-card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+    </script>
+</body>
+</html>
